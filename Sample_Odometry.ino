@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------- */
-
+//By David P. Anderson
 #define WHEEL_BASE 9.73
 #define LEFT_CLICKS_PER_INCH 79.52
 #define RIGHT_CLICKS_PER_INCH 79.48
