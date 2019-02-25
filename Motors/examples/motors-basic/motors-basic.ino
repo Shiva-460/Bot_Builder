@@ -30,4 +30,10 @@ void loop() {
   delay(1000);
   motors.park();
   delay(1000);
+  motors.right();
+  delay(1000);
+  motors.left();
+  delay(1000);
+  motors.park();
+  delay(1000);
 }
