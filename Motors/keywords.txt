@@ -15,3 +15,5 @@ m2_rev  	KEYWORD2
 stop_m1 	KEYWORD2
 stop_m2 	KEYWORD2
 stop_motors 	KEYWORD2
+right		KEYWORD2
+left		KEYWORD2
