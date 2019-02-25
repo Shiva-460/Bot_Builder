@@ -9,8 +9,8 @@
  * 
  */
 
- #ifndef Motors.h
- #define Motors.h
+ #ifndef Motors_h
+ #define Motors_h
 
  #include "Arduino.h"
 
@@ -39,7 +39,7 @@
     
   private:
   /*****Fields*****/
-  const int motor1_on_pin, motor2_on_pin, motor1_Direction_A, motor1_Direction_B, motor2_Direction_A, motor2_Direction_B;  
+  int motor1_on_pin, motor2_on_pin, motor1_Direction_A, motor1_Direction_B, motor2_Direction_A, motor2_Direction_B;  
 };
 
 #endif
