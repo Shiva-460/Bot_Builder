@@ -23,6 +23,8 @@
     void drive();
     void reverse();
     void park();
+    void right();
+    void left();
     void drive_m1();
     void drive_m2();
     void reverse_m1();
