@@ -31,6 +31,16 @@ void Motors::drive(){
   drive_m2();
 }
 
+void Motors::right(){
+  drive_m1();
+  reverse_m2();
+}
+
+void Motors::left(){
+  drive_m2();
+  reverse_m1();
+}
+
 void Motors::reverse(){
   reverse_m1();
   reverse_m2();
