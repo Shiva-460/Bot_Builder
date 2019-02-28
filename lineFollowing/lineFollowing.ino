@@ -1,7 +1,7 @@
 #include <LineSensor.h>
 #include <Motors.h>
 
-LineSensor leftSide(45), rightSide(45);
+LineSensor leftSide(45), rightSide(44);
 
 const int mr_en = 25; //Motor 1 PWM Speed Control Pin, Pin 1 on L239
 const int ml_en = 24; //Motor 2 PWM Speed Control Pin, Pin 9 on L239
