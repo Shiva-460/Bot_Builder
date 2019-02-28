@@ -1,0 +1,4 @@
+LineSensor	KEYWORD1
+value		KEYWORD2
+isBright	KEYWORD2
+isDark		KEYWORD2
