@@ -12,7 +12,7 @@ void setup() {
 }
 
 void loop() {
-  LineSensor leftSide(45), rightSide(45);
+  LineSensor leftSide(45), rightSide(44);
   Serial.print("\nleft bright?:");
   Serial.print(leftSide.isBright());
   Serial.print("\nright bright?:");
