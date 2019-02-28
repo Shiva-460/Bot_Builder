@@ -17,7 +17,7 @@
  class Motors {
   public:
   /*****Constructor*****/
-    Motors(int m1_en, int m2_en, int m1_da, int m1_db, int m2_da, int m2_db);
+    Motors(int mr_en, int ml_en, int mr_da, int mr_db, int ml_da, int ml_db);
 
   /*****method signatures*****/
     void drive();
@@ -25,23 +25,23 @@
     void park();
     void right();
     void left();
-    void drive_m1();
-    void drive_m2();
-    void reverse_m1();
-    void reverse_m2();
+    void drive_mr();
+    void drive_ml();
+    void reverse_mr();
+    void reverse_ml();
     void forward_motors();
     void reverse_motors();
-    void m1_fwd();
-    void m2_fwd();
-    void m1_rev();
-    void m2_rev();
+    void mr_fwd();
+    void ml_fwd();
+    void mr_rev();
+    void ml_rev();
     void stop_motors();
-    void stop_m1();
-    void stop_m2();
+    void stop_mr();
+    void stop_ml();
     
   private:
   /*****Fields*****/
-  int motor1_on_pin, motor2_on_pin, motor1_Direction_A, motor1_Direction_B, motor2_Direction_A, motor2_Direction_B;  
+  int motorR_on_pin, motorL_on_pin, motorR_Direction_A, motorR_Direction_B, motorL_Direction_A, motorL_Direction_B;  
 };
 
 #endif
