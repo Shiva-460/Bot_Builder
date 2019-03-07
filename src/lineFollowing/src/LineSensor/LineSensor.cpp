@@ -28,7 +28,7 @@ uint32_t LineSensor::value(){
 }
 
 boolean LineSensor::isBright(){
-    return value() < 120;
+    return value() < 300;
 }
 
 boolean LineSensor::isDark(){

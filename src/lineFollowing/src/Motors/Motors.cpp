@@ -32,13 +32,17 @@ void Motors::drive(){
 }
 
 void Motors::right(){
-  drive_mr();
-  reverse_ml();
+  //drive_mr();
+  drive_ml();
+  //reverse_ml();
+  reverse_mr();
 }
 
 void Motors::left(){
-  drive_ml();
-  reverse_mr();
+  //drive_ml();
+  drive_mr();
+  //reverse_mr();
+  reverse_ml();
 }
 
 void Motors::reverse(){
