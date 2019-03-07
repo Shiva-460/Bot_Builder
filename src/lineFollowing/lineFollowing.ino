@@ -1,5 +1,5 @@
-#include "LineSensor.h"
-#include "Motors.h"
+#include "src/LineSensor/LineSensor.h"
+#include "src/Motors/Motors.h"
 #include "Wires.h"
 #include "lineFollowing.h"
 
