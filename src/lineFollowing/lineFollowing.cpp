@@ -1,5 +1,5 @@
-#include "LineSensor/LineSensor.h"
-#include "Motors/Motors.h"
+#include "lineFollowing.h"
+
 
 void lineFollow(Motors motors,LineSensor leftSide,LineSensor rightSide)
 {
