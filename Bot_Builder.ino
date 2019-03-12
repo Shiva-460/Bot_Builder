@@ -1,12 +1,13 @@
-#include <Encoder.h>
+//#include <Encoder.h>
 
 #include "Wires.h"
 #include "src/lineFollowing/lineFollowing.h"
 #include "src/DeadReckoning/DeadReckoner.h"
+#include "odometry.h"
 
 
-Encoder knobLeft(LEFT_MOTOR_BCD_YELLOW_A, LEFT_MOTOR_BCD_WHITE_B);
-Encoder knobRight(RIGHT_MOTOR_BCD_YELLOW_A, RIGHT_MOTOR_BCD_WHITE_B);
+//Encoder knobLeft(LEFT_MOTOR_BCD_YELLOW_A, LEFT_MOTOR_BCD_WHITE_B);
+//Encoder knobRight(RIGHT_MOTOR_BCD_YELLOW_A, RIGHT_MOTOR_BCD_WHITE_B);
 
 LineSensor leftSide(LEFT_LINE_SENSOR), rightSide(RIGHT_LINE_SENSOR);
 
@@ -20,31 +21,34 @@ const int ml_db = LEFT_MOTOR_BOTTOM_WIRE; //Motor 2 Directional Control B, Pin 1
 
 long positionLeft  = -999;
 long positionRight = -999;
-//auto timer = millis();
-
-//int i = 0, j = 0, k = 0;
-
-//int left[1000];
-//int right[1000];
 
 Motors motors(mr_en, ml_en, mr_da, mr_db, ml_da, ml_db);
 
 void setup() {
-  Serial.begin(115200);
-  Serial.println("Two Wheels Encoder Test: ");
-  
+  Serial.begin(9600); 
+  Serial.println("Current Position: ");
+
+  //Serial.begin(9600); //9600 for Arduino IDE.
+  //Serial.println("Two Wheels Encoder Test: ");
 }
 void loop() {
-  
- //lineFollow(motors, leftSide,rightSide);
+  //view_Encoders();
+  //test_Encoders();
+  view_Odometry();
+  delay(1000);
+}
+
+void view_Encoders(){
+
+  //Include these statements in setup first:
+  /***********************/
+  //Serial.begin(115200); //9600 for Arduino IDE.
+  //Serial.println("Two Wheels Encoder Test: ");
+  /***********************/
 
   //Encoder's view while driving:
   long newLeft, newRight;
   
-//  left[i] = knobLeft.read();
-//  i++;
-//  right[j] = knobRight.read();
-//  j++;
   newLeft = knobLeft.read();
   newRight = knobRight.read();
   if (newLeft != positionLeft || newRight != positionRight) {
@@ -64,10 +68,44 @@ void loop() {
     knobLeft.write(0);
     knobRight.write(0);
   }
- // motors.drive();
-// for(; k < i; k++){
-//  Serial.print("left clicks = "); 
-//  Serial.println(left[k]);
-// }
-//delay(1000);
+}
+
+void test_Encoders(){
+  view_Encoders();
+  motors.drive();
+}
+
+void view_Odometry(){
+  //Include these statements in setup first:
+  /***********************/
+  //Serial.begin(9600); 
+  //Serial.println("Current Position: ");
+  /***********************/
+
+  //if (lsamp != last_left || rsamp != last_right) {
+    Serial.print("X Position in cm = ");
+    Serial.print(X_pos/10);
+    Serial.print(", Y Position in cm = ");
+    Serial.print(Y_pos/10);
+    Serial.print(", Theta = ");
+    Serial.print(theta_D);
+    Serial.println();
+    //positionLeft = newLeft;
+    //positionRight = newRight;
+  //}
+  // if a character is sent from the serial monitor,
+  // reset both back to zero.
+  if (Serial.available()) {
+    Serial.read();
+    Serial.println("Reset both Encoders to zero");
+    knobLeft.write(0);
+    knobRight.write(0);
+  }
+  odometers();
+
+}
+
+void test_Odometry(){
+  view_Odometry();
+  motors.drive();
 }
