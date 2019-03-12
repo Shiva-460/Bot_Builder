@@ -1,9 +1,22 @@
-//#include <Encoder.h>
+/*
+ * Christopher Marisco
+ * Spencer Sawyer
+ * 
+ * 
+ * 
+ */
+
+//View = testing without motor power.
+//Test = testing with motor power.
+
+//#include <Encoder.h> Used in odometry.h
 
 #include "Wires.h"
 #include "src/lineFollowing/lineFollowing.h"
 #include "src/DeadReckoning/DeadReckoner.h"
 #include "odometry.h"
+
+
 
 
 //Encoder knobLeft(LEFT_MOTOR_BCD_YELLOW_A, LEFT_MOTOR_BCD_WHITE_B);
@@ -30,13 +43,13 @@ Motors motors(mr_en, ml_en, mr_da, mr_db, ml_da, ml_db);
 
 void setup() {
   /*****Test_Target*****/
+  //targets are used in odometry.h
+
   X_target = 500.0; //50 cm
   Y_target = 500.0; //50 cm
   Serial.begin(9600); 
   Serial.println("Current Position: ");
 
-  //Serial.begin(9600); //9600 for Arduino IDE.
-  //Serial.println("Two Wheels Encoder Test: ");
 }
 void loop() {
   //view_Encoders();
@@ -44,7 +57,7 @@ void loop() {
   //view_Odometry();
   //test_Odometry();
   test_Y_Distance();
-  delay(1000);
+  //delay(1000);
 }
 
 void view_Encoders(){
@@ -85,10 +98,7 @@ void test_Encoders(){
 }
 
 void view_Odometry(){
-  //Include these statements in setup first:
   /***********************/
-  //Serial.begin(9600); 
-  //Serial.println("Current Position: ");
   /***********************/
 
   //if (lsamp != last_left || rsamp != last_right) {
@@ -99,9 +109,7 @@ void view_Odometry(){
     Serial.print(", Theta = ");
     Serial.print(theta_D);
     Serial.println();
-    //positionLeft = newLeft;
-    //positionRight = newRight;
-  //}
+
   // if a character is sent from the serial monitor,
   // reset both back to zero.
   if (Serial.available()) {
@@ -110,10 +118,17 @@ void view_Odometry(){
     knobLeft.write(0);
     knobRight.write(0);
   }
+
+  /*
+   * Called from odometry.h
+   * Used to calculate actual positions X_pos, X_target, etc...
+   */
   odometers();
 
 }
 
+//Untested.
+//TO-DO.
 void test_Odometry(){
   view_Odometry();
   motors.drive();
@@ -138,12 +153,14 @@ void test_Turn(){
   }
 
   delay(1000);
+  
+  motors.park();
 }
 
+//Untested.
+//TO-DO.
 void view_Targert(){
   view_Odometry();
-  delay(1000);
-  locate_target();
 
   Serial.print("Target X in cm = ");
   Serial.print(X_target/10);
@@ -166,8 +183,10 @@ void view_Targert(){
 }
 
 void test_Y_Distance(){
-  view_Odometry();
-  while((Y_pos/10) < 35.0){
+  view_Odometry();//*/odometers();
+  if((Y_pos/10.0) < 35.0){
     motors.drive();
+  }else{
+  motors.park();
   }
 }

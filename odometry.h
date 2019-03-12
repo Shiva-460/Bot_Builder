@@ -27,30 +27,30 @@
 /* ----------------------------------------------------------------------- */
 /* odometers() maintains these global accumulator variables: */
 
-double theta = 0.0;                    /* bot heading */
-double theta_D = 0.0;
-double X_pos = 0.0;                    /* bot X position in mm */
-double Y_pos = 0.0;                    /* bot Y position in mm */
-double total_mm = 0.0;             /* total mm traveled */
+volatile double theta = 0.0;                    /* bot heading */
+volatile double theta_D = 0.0;
+volatile double X_pos = 0.0;                    /* bot X position in mm */
+volatile double Y_pos = 0.0;                    /* bot Y position in mm */
+volatile double total_mm = 0.0;             /* total mm traveled */
 
 /* using these local variables */
 
-double left_mm = 0.0;
-double right_mm = 0.0;
-double mm = 0.0;
+volatile double left_mm = 0.0;
+volatile double right_mm = 0.0;
+volatile double mm = 0.0;
 
 /* ----------------------------------------------------------------------- */
-long lsamp = 0, rsamp = 0, L_ticks = 0, R_ticks = 0, last_left = 0, last_right = 0;
+volatile long lsamp = 0, rsamp = 0, L_ticks = 0, R_ticks = 0, last_left = 0, last_right = 0;
 
 /* ----------------------------------------------------------------------- */
 /* locate_target() uses these global variables */
 
-double X_target;                 /* X lateral target position */
-double Y_target;                 /* Y vertical target position */
-double target_bearing = 0.0;           /* bearing in radians from current position */
+volatile double X_target;                 /* X lateral target position */
+volatile double Y_target;                 /* Y vertical target position */
+volatile double target_bearing = 0.0;           /* bearing in radians from current position */
 
-double target_distance = 0.0;         	/* distance in inches from position */
-double heading_error = 0.0;            /* heading error in degrees */
+volatile double target_distance = 0.0;         	/* distance in inches from position */
+volatile double heading_error = 0.0;            /* heading error in degrees */
 
 /* ----------------------------------------------------------------------- */
 /*  calculate distance and bearing to target.
