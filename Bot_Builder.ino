@@ -22,13 +22,16 @@ const int ml_db = LEFT_MOTOR_BOTTOM_WIRE; //Motor 2 Directional Control B, Pin 1
 long positionLeft  = -999;
 long positionRight = -999;
 
-/*****Test_Target*****/
-X_target = 500.0; //50 cm
-Y_target = 500.0; //50 cm
+
+
+
 
 Motors motors(mr_en, ml_en, mr_da, mr_db, ml_da, ml_db);
 
 void setup() {
+  /*****Test_Target*****/
+  X_target = 500.0; //50 cm
+  Y_target = 500.0; //50 cm
   Serial.begin(9600); 
   Serial.println("Current Position: ");
 
@@ -38,7 +41,9 @@ void setup() {
 void loop() {
   //view_Encoders();
   //test_Encoders();
-  view_Odometry();
+  //view_Odometry();
+  //test_Odometry();
+  test_Y_Distance();
   delay(1000);
 }
 
@@ -155,5 +160,12 @@ void view_Targert(){
     Serial.println("Reset both Encoders to zero");
     knobLeft.write(0);
     knobRight.write(0);
+  }
+}
+
+void test_Y_Distance(){
+  view_Odometry();
+  while((Y_pos/10) < 35.0){
+    motors.drive();
   }
 }
