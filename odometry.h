@@ -102,24 +102,24 @@ void odometers()
         
 }
 
-//void locate_target() 
-//{
-//            double x = 0.0, y = 0.0;
-//
-//	
-//
-        	//x = X_target - X_pos;
-        	//y = Y_target - Y_pos;
+void locate_target() 
+{
+            	double x = 0.0, y = 0.0;
 
-        	//target_distance = sqrt((x*x)+(y*y));
+	
+
+        	x = X_target - X_pos;
+        	y = Y_target - Y_pos;
+
+        	target_distance = sqrt((x*x)+(y*y));
 	
         	/* no divide-by-zero allowed! */
-        	//if (x > 0.00001) target_bearing = 90.0 - atan(y/x);
-        	//else if (x < -0.00001) target_bearing = -90.0 - atan(y/x);
+        	if (x > 0.00001) target_bearing = 90.0 - atan(y/x);
+        	else if (x < -0.00001) target_bearing = -90.0 - atan(y/x);
 
-        	//heading_error = target_bearing - (theta*RADS);
-        	//if (heading_error > 180.0) heading_error -= 360.0;
-		    //else if (heading_error < -180.0) heading_error += 360.0;
+        	heading_error = target_bearing - (theta*RADS);
+        	if (heading_error > 180.0) heading_error -= 360.0;
+		else if (heading_error < -180.0) heading_error += 360.0;
 
 	
-//}
+}

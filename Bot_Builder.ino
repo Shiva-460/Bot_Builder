@@ -22,6 +22,10 @@ const int ml_db = LEFT_MOTOR_BOTTOM_WIRE; //Motor 2 Directional Control B, Pin 1
 long positionLeft  = -999;
 long positionRight = -999;
 
+/*****Test_Target*****/
+X_target = 500.0; //50 cm
+Y_target = 500.0; //50 cm
+
 Motors motors(mr_en, ml_en, mr_da, mr_db, ml_da, ml_db);
 
 void setup() {
@@ -108,4 +112,48 @@ void view_Odometry(){
 void test_Odometry(){
   view_Odometry();
   motors.drive();
+}
+
+void test_Turn(){
+
+  view_Odometry();
+
+  motors.drive();
+
+  delay(2000);
+
+  while(theta_D <= 90){
+    motors.right();
+  }
+
+  delay(1000);
+
+  while(theta_D >= 0){
+    motors.left();
+  }
+
+  delay(1000);
+}
+
+void view_Targert(){
+  view_Odometry();
+
+  Serial.print("Target X in cm = ");
+  Serial.print(X_target/10);
+  Serial.print(", Target Y in cm = ");
+  Serial.print(Y_target/10);
+  Serial.print(", Distance in cm = ");
+  Serial.print(target_distance/10);
+  Serial.print(", Target Bearing = ");
+  Serial.print(target_bearing);
+  Serial.println();
+  
+  // if a character is sent from the serial monitor,
+  // reset both back to zero.
+  if (Serial.available()) {
+    Serial.read();
+    Serial.println("Reset both Encoders to zero");
+    knobLeft.write(0);
+    knobRight.write(0);
+  }
 }
