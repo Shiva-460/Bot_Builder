@@ -142,6 +142,8 @@ void test_Turn(){
 
 void view_Targert(){
   view_Odometry();
+  delay(1000);
+  locate_target();
 
   Serial.print("Target X in cm = ");
   Serial.print(X_target/10);
