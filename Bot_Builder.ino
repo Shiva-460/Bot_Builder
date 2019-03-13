@@ -56,7 +56,7 @@ void loop() {
   //test_Encoders();
   //view_Odometry();
   //test_Odometry();
-  test_Y_Distance();
+  //test_Y_Distance();
   //delay(1000);
 }
 
@@ -142,11 +142,15 @@ void test_Turn(){
 
   delay(2000);
 
-  while(theta_D <= 90){
+  while (theta_D <= 90){
     motors.right();
   }
 
   delay(1000);
+
+  motors.drive();
+
+  delay(2000);
 
   while(theta_D >= 0){
     motors.left();
