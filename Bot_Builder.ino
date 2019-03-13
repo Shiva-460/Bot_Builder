@@ -41,14 +41,22 @@ long positionRight = -999;
 
 Motors motors(mr_en, ml_en, mr_da, mr_db, ml_da, ml_db);
 
+enum origin {
+    ZERO, NINETY
+    
+  };
+  origin o;
+
 void setup() {
   /*****Test_Target*****/
   //targets are used in odometry.h
 
   X_target = 500.0; //50 cm
   Y_target = 500.0; //50 cm
+  origin o = ZERO;
   Serial.begin(9600); 
   Serial.println("Current Position: ");
+  
 
 }
 void loop() {
@@ -57,7 +65,8 @@ void loop() {
   //view_Odometry();
   //test_Odometry();
   //test_Y_Distance();
-  //delay(1000);
+  test_Turn();
+  //delay(2000);
 }
 
 void view_Encoders(){
@@ -134,37 +143,37 @@ void test_Odometry(){
   motors.drive();
 }
 
-void test_Turn(){
+/*****Tests Turning*****/
 
-  view_Odometry();
+void test_Turn()
+{
 
-  motors.drive();
+  /**States for turning**/
+  view_Odometry();//*/odometers();
 
-  delay(2000);
-
-  while (theta_D <= 90){
+  if (o == ZERO && theta_D <= 90.0){
+    
     motors.right();
+  } else{
+    o = NINETY;
+    
   }
-
-  delay(1000);
-
-  motors.drive();
-
-  delay(2000);
-
-  while(theta_D >= 0){
-    motors.left();
-  }
-
-  delay(1000);
   
-  motors.park();
+
+  if (o == NINETY && theta_D >= 0.0){
+    motors.left();
+   //motors.park();
+  } else{
+    o = ZERO;
+  }
+  //Serial.print(theta_D); Serial.print("\n");
 }
 
 //Untested.
 //TO-DO.
 void view_Targert(){
-  view_Odometry();
+  /*view_Odometry();//*/odometers();
+  locate_target();
 
   Serial.print("Target X in cm = ");
   Serial.print(X_target/10);
