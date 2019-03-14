@@ -15,7 +15,7 @@
 #include "src/lineFollowing/lineFollowing.h"
 #include "src/DeadReckoning/DeadReckoner.h"
 #include "odometry.h"
-
+#include "IK.h"
 
 
 
@@ -47,6 +47,14 @@ enum origin {
   };
   origin o;
 
+// Defines the states of the main loop
+enum states {follow_line, look_for_syringe, drive_to_syringe, pick_up_syringe, drive_to_origin};
+states state;
+
+LobotServoController xArm(Serial2);
+
+// Stores the servos of the arm as an array, from servo 1 to servo 6
+LobotServo servos[6];// = {500, 500, 500, 500, 500, 500};
 void setup() {
   /*****Test_Target*****/
   //targets are used in odometry.h
@@ -54,10 +62,9 @@ void setup() {
   X_target = 500.0; //50 cm
   Y_target = 500.0; //50 cm
   origin o = ZERO;
-  Serial.begin(9600); 
+  Serial.begin(9600);
+  Serial2.begin(9600); // For arm communication
   Serial.println("Current Position: ");
-  
-
 }
 void loop() {
   //view_Encoders();
@@ -67,6 +74,63 @@ void loop() {
   //test_Y_Distance();
   test_Turn();
   //delay(2000);
+
+  switch (state) {
+    // Default to line following
+    case follow_line:
+      lineFollow(motors, leftSide, rightSide);
+      // Every 25cm turn to the right and look for a syringe
+      if (total_mm >= 250){
+        state = look_for_syringe;  
+      }
+      break;
+      
+    case look_for_syringe:
+      // TO-DO reset origin
+      turn_right_ninety();
+      // Read from camera
+      // Check if valid (?)
+      // if (syringe == true)
+      //    state = drive_to_syringe
+      // else
+      //    turn_left_ninety
+      //    state = follow_line
+      break;
+
+    case drive_to_syringe:
+      // Drive to within 10cm of the syringe
+      // if syringe distance < 10cm
+      //   state = drive_to_syringe
+      // else
+      //   state = pick_up_syringe;
+     break;
+
+    case pick_up_syringe:
+       // IK(coordinates)
+       dropoff();
+       state = drive_to_origin;
+      break;
+    default:
+      state = follow_line;
+      break;
+  }
+}
+
+void turn_right_ninety(){
+  if (o == ZERO && theta_D <= 90.0){
+    motors.right();
+  } else{
+    o = NINETY;
+  }
+}
+
+void turn_left_ninety(){
+  if (o == NINETY && theta_D >= 0.0){
+    motors.left();
+   //motors.park();
+  } else{
+    o = ZERO;
+  }
 }
 
 void view_Encoders(){
@@ -202,4 +266,20 @@ void test_Y_Distance(){
   }else{
   motors.park();
   }
+}
+
+void dropoff(){
+
+  xArm.moveServos(6, 1000, 1, 735, 2, 877, 3, 132, 4, 857, 5, 687, 6, 892);
+  
+  delay(1000);
+  
+  xArm.moveServos(6, 1000, 1, 735, 2, 877, 3, 34, 4, 838, 5, 617, 6, 892);
+  
+  delay(1000);
+  
+  xArm.moveServos(6, 1000, 1, 450, 2, 877, 3, 34, 4, 838, 5, 617, 6, 892);
+  
+  delay(1000);
+
 }
