@@ -52,22 +52,68 @@ void Motors::reverse(){
 
 void Motors::drive_mr(){
   mr_fwd();
+  if(!digitalRead(motorR_on_pin))
+  {
+  analogWrite(motorR_on_pin, 64);
+  delay(20);
+  analogWrite(motorR_on_pin, 128);
+  delay(20);
+  analogWrite(motorR_on_pin, 192);
+  delay(2);
+  analogWrite(motorR_on_pin, 255);
+  delay(2);
+  }
   digitalWrite(motorR_on_pin, HIGH);
 }
 
 void Motors::drive_ml(){
   ml_fwd();
+  if(!digitalRead(motorL_on_pin))
+  {
+  analogWrite(motorL_on_pin, 64);
+  delay(20);
+  analogWrite(motorL_on_pin, 128);
+  delay(20);
+  analogWrite(motorL_on_pin, 192);
+  delay(2);
+  analogWrite(motorL_on_pin, 255);
+  delay(2);
   digitalWrite(motorL_on_pin, HIGH);  
+  }
+  digitalWrite(motorL_on_pin, HIGH); 
 }
 
 void Motors::reverse_mr(){
   mr_rev();
+    if(!digitalRead(motorR_on_pin))
+  {
+  analogWrite(motorR_on_pin, 64);
+  delay(20);
+  analogWrite(motorR_on_pin, 128);
+  delay(20);
+  analogWrite(motorR_on_pin, 192);
+  delay(2);
+  analogWrite(motorR_on_pin, 255);
+  delay(2);
+  }
   digitalWrite(motorR_on_pin, HIGH);
 }
 
 void Motors::reverse_ml(){
   ml_rev();
-  digitalWrite(motorL_on_pin, HIGH);
+ if(!digitalRead(motorL_on_pin))
+  {
+  analogWrite(motorL_on_pin, 64);
+  delay(20);
+  analogWrite(motorL_on_pin, 128);
+  delay(20);
+  analogWrite(motorL_on_pin, 192);
+  delay(2);
+  analogWrite(motorL_on_pin, 255);
+  delay(2);
+  digitalWrite(motorL_on_pin, HIGH);  
+  }
+  digitalWrite(motorL_on_pin, HIGH); 
 }
 
 void Motors::park(){
