@@ -43,7 +43,7 @@ double dist;
 Motors motors(mr_en, ml_en, mr_da, mr_db, ml_da, ml_db);
 /***Enums used to control states for testing***/
 enum origin {
-    DRIVE, TURN
+    DRIVE, WAIT
     
 };
 
@@ -55,6 +55,7 @@ void setup() {
 
   X_target = 500.0; //50 cm
   Y_target = 500.0; //50 cm
+  o = DRIVE;
   dist = 0.0;
   degree = 45.0;
   overshoot = 3.0;
@@ -70,10 +71,28 @@ void loop() {
   //view_Odometry();//*/odometers();
   //test_Odometry();
   //test_Y_Distance();
-  view_Target();
-  turnRightToDegrees(degree); 
+  go_and_get();
   //turnLeftToDegrees(degree);
-  test_Y_Distance();
+  //test_Y_Distance();
+}
+
+//FUNCTION has been tested.
+//If given x and y coordinates, it will turn towards it and drive to it.
+//it stops there.
+//Uses enums to run once if in main loop, user may change its states, or use other
+//control flow altogether.
+
+//To get back to location,
+//run turnRightToDegrees with 180.0 input.
+//drive_Y_Distance of same dist value usedd to drive out.
+//linefollow (may need to turn when on the line again!)
+void go_and_get(){
+   if(o == DRIVE ){
+  view_Target();
+  turnRightToDegrees(target_bearing);
+  drive_to_dist(); 
+  }
+  o = WAIT;
 }
 
 void view_Encoders(){
@@ -163,6 +182,7 @@ void turnRightToDegrees(double degree)
   motors.park();
 }
 
+
 void turnLeftToDegrees(double degree)
 {
   while(theta_D >= degree + overshoot){
@@ -180,7 +200,7 @@ void turnLeftToDegrees(double degree)
 void view_Target(){
   /*view_Odometry();//*/odometers();
   locate_target();
-  //dist = target_distance;
+  dist = target_distance;
   
 
   Serial.print("X Position in cm = ");
@@ -221,4 +241,13 @@ void test_Y_Distance(){
   }
     motors.park();
   
+}
+void drive_to_dist(){
+  while( sqrt(X_pos*X_pos + Y_pos*Y_pos) <= dist){
+    odometers();
+    motors.drive();
+  }
+  motors.park();
+  X_target = 0.0;
+  Y_target = 0.0;
 }

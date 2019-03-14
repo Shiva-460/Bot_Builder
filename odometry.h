@@ -125,7 +125,7 @@ void locate_target()
 	
         	/* no divide-by-zero allowed! */
         	if (x > 0.00001) target_bearing = 90.0 - (atan(y/x)*RADS);
-        	else if (x < -0.00001) target_bearing = -90.0 - (atan(y/x)*RADS);
+        	else if (x < -0.00001) target_bearing = 360.0 - (90.0 + (atan(y/x)*RADS));
 
         	heading_error = target_bearing - theta_D;
         	if (heading_error > 180.0) heading_error -= 360.0;
