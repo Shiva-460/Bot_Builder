@@ -33,7 +33,9 @@ long positionLeft  = -999;
 long positionRight = -999;
 
 double degree;
-double fudgeFactor;
+double overshoot;
+
+double dist;
 
 
 
@@ -53,9 +55,9 @@ void setup() {
 
   X_target = 500.0; //50 cm
   Y_target = 500.0; //50 cm
- 
-  degree = 180.0;
-  //fudgeFactor = 10 + 10*((int)degree % 90);
+  dist = 0.0;
+  degree = 45.0;
+  overshoot = 3.0;
   Serial.begin(9600); 
   Serial.println("Current Position: ");
   
@@ -65,11 +67,13 @@ void loop() {
   
   //view_Encoders();
   //test_Encoders();
-  view_Odometry();//*/odometers();
+  //view_Odometry();//*/odometers();
   //test_Odometry();
-  test_Y_Distance();
-  turnRightDegrees(degree); 
   //test_Y_Distance();
+  view_Target();
+  turnRightToDegrees(degree); 
+  //turnLeftToDegrees(degree);
+  test_Y_Distance();
 }
 
 void view_Encoders(){
@@ -148,24 +152,44 @@ void test_Odometry(){
 
 /*****Tests Turning*****/
 
-void turnRightDegrees(double degree)
+void turnRightToDegrees(double degree)
 {
-  while(theta_D <= degree){
+  while(theta_D <= degree + overshoot){
     /*view_Odometry();//*/odometers();
-    WHEEL_BASE = 245;
+    WHEEL_BASE = 250;
     motors.right();
   }
   WHEEL_BASE = 221.5;
   motors.park();
 }
 
+void turnLeftToDegrees(double degree)
+{
+  while(theta_D >= degree + overshoot){
+    /*view_Odometry();//*/odometers();
+    WHEEL_BASE = 250;
+    motors.left();
+  }
+  WHEEL_BASE = 221.5;
+  motors.park();
+}
 
 
 //Untested.
 //TO-DO.
-void view_Targert(){
+void view_Target(){
   /*view_Odometry();//*/odometers();
   locate_target();
+  //dist = target_distance;
+  
+
+  Serial.print("X Position in cm = ");
+  Serial.print(X_pos/10);
+  Serial.print(", Y Position in cm = ");
+  Serial.print(Y_pos/10);
+  Serial.print(", Theta = ");
+  Serial.print(theta_D);
+  Serial.println();
 
   Serial.print("Target X in cm = ");
   Serial.print(X_target/10);
@@ -175,6 +199,8 @@ void view_Targert(){
   Serial.print(target_distance/10);
   Serial.print(", Target Bearing = ");
   Serial.print(target_bearing);
+  Serial.print(", Heading Error = ");
+  Serial.print(heading_error);
   Serial.println();
   
   // if a character is sent from the serial monitor,
@@ -189,7 +215,7 @@ void view_Targert(){
 
 void test_Y_Distance(){
   //*view_Odometry();//*/odometers();
-  while((Y_pos/10.0) < 100.0){
+  while((Y_pos/10.0) < 50.0){
     odometers();
     motors.drive();
   }

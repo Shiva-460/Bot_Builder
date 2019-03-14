@@ -99,6 +99,9 @@ void odometers()
 		/* and clip the rotation to plus or minus 360 degrees */
                 theta -= (double)((int)(theta/TWOPI))*TWOPI;
 		            theta_D = theta * 180/PI;
+//               if(theta_D < 0){
+//                  theta_D += 360;
+//               }
 
 		/* now calculate and accumulate our position in inches */
                 Y_pos += mm * cos(theta); 
@@ -121,10 +124,10 @@ void locate_target()
         	target_distance = sqrt((x*x)+(y*y));
 	
         	/* no divide-by-zero allowed! */
-        	if (x > 0.00001) target_bearing = 90.0 - atan(y/x);
-        	else if (x < -0.00001) target_bearing = -90.0 - atan(y/x);
+        	if (x > 0.00001) target_bearing = 90.0 - (atan(y/x)*RADS);
+        	else if (x < -0.00001) target_bearing = -90.0 - (atan(y/x)*RADS);
 
-        	heading_error = target_bearing - (theta*RADS);
+        	heading_error = target_bearing - theta_D;
         	if (heading_error > 180.0) heading_error -= 360.0;
 		else if (heading_error < -180.0) heading_error += 360.0;
 
