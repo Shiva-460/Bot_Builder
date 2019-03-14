@@ -1,8 +1,9 @@
 #include "serialPiCom.h"
+#include <arduino.h>
 void clearBuffer()
 { 
   
-  while(Serial.available()> 0) Serial1.print(Serial.read());
+  while(Serial.available() > 0);
   //Serial1.print("cleared buffer\n");
 }
 

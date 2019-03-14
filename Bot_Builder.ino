@@ -16,6 +16,7 @@
 #include "src/DeadReckoning/DeadReckoner.h"
 #include "odometry.h"
 #include "IK.h"
+#include "src/SerialCallResponse/serialPiCom.h"
 
 
 
@@ -62,7 +63,7 @@ void setup() {
   X_target = 500.0; //50 cm
   Y_target = 500.0; //50 cm
   origin o = ZERO;
-  Serial.begin(9600);
+  Serial.begin(38400);
   Serial2.begin(9600); // For arm communication
   Serial.println("Current Position: ");
 }
