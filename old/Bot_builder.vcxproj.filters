@@ -45,9 +45,6 @@
     <ClInclude Include="src\lineFollowing\src\Motors\Motors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\SerialCallResponse\serialPiCom.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DeadReckoning\DeadReckoner.cpp">
@@ -63,9 +60,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\lineFollowing\src\Motors\Motors.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SerialCallResponse\serialPiCom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

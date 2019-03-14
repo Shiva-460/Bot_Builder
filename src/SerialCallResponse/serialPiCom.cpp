@@ -10,6 +10,7 @@ void clearBuffer()
 piData SerialSendReceive()
 {
   piData toReturn;
+  toReturn.syringeBool = 0;
  Serial.print("S");  
   if (Serial.available() > 0) 
   {
