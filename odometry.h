@@ -12,15 +12,20 @@
 //wheel base 205 or 221.5 mm (depends if from mid of wheels or just between wheels)
 //rwheel diameter = 82.14 mm
 //lwheel diameter = 80.51 mm
-//right_clicks_per_mm = 18.74
-//left_clicks_per_mm = 18.85
+//right_clicks_per_mm = 18.74 or 19.23
+//left_clicks_per_mm = 18.85 or 19.36
 
 /* ----------------------------------------------------------------------- */
 
-#define WHEEL_BASE 221.5
+//IF We need adjust turns for theta accuracy., use the wheel_base
+//Higher wheel base = smaller theta calculated per turn.
+//WARNING THIS IMPACTS POSITION CALCULATIONS.
+
+//MINIMIZE NUMBER OF TURNS COMMANDED TO REDUCE COMPOUNDING ERRORS!!!!
+//#define WHEEL_BASE 221.5
 #define LEFT_CLICKS_PER_MM 19.36
 #define RIGHT_CLICKS_PER_MM 19.23
-
+float WHEEL_BASE = 221.5;
 #define TWOPI 6.2831853070		/* nice to have float precision */
 #define RADS 57.2958			/* radians to degrees conversion */
 
@@ -93,7 +98,7 @@ void odometers()
 
 		/* and clip the rotation to plus or minus 360 degrees */
                 theta -= (double)((int)(theta/TWOPI))*TWOPI;
-		theta_D = theta * 180/PI;
+		            theta_D = theta * 180/PI;
 
 		/* now calculate and accumulate our position in inches */
                 Y_pos += mm * cos(theta); 
@@ -101,12 +106,14 @@ void odometers()
 
         
 }
+//TO-DO
+//reset_odometers(){
+//}
+
 
 void locate_target() 
 {
-            	double x = 0.0, y = 0.0;
-
-	
+          double x = 0.0, y = 0.0;
 
         	x = X_target - X_pos;
         	y = Y_target - Y_pos;
