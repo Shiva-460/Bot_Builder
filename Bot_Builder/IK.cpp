@@ -1,5 +1,6 @@
 #include "IK.h"
 void IK(LobotServo servos[], float pos_x, float pos_y, float pos_z){
+	servos[0].Position = 100;
   // Calculate the shifted "real" x-y position
   float a = sqrt(sq(pos_x)+sq(pos_z));
   float b = (pos_y);
@@ -54,7 +55,10 @@ void IK(LobotServo servos[], float pos_x, float pos_y, float pos_z){
   // Update the servo values by shifting the values and scaling them from radians to (0, 1000)
   servos[4].Position = (int)((alpha + theta) * 800 / PI) + 100; // Shoulder
   servos[3].Position = 900 - (int)((beta_prime) * 900 / PI); // Elbow
-  //servos[2].Position = (int)((p) * 500 / PI) + 500; // Wrist
+  servos[2].Position = (int)((p) * 500 / PI) + 500; // Wrist
+
+  // Wiggle around
+	servos[1]
   //servos[2].Position = (int)(1000*1/3);
   if (y_3 < b){
     servos[2].Position = (int)(450 + p * 900 / PI);
