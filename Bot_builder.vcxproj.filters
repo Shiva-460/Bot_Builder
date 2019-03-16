@@ -21,9 +21,6 @@
     <ClInclude Include="__vm\.Bot_builder.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="odometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Wires.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -48,6 +45,12 @@
     <ClInclude Include="src\SerialCallResponse\serialPiCom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IK.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BotNavigation\odometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DeadReckoning\DeadReckoner.cpp">
@@ -66,6 +69,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\SerialCallResponse\serialPiCom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IK.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

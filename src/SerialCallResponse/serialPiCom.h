@@ -7,4 +7,5 @@ struct piData
 	int syringeBool;
 
 };
+piData SerialSendReceive();
 #endif
