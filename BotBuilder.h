@@ -11,14 +11,14 @@
 #include "src/SerialCallResponse/serialPiCom.h"
 
 
-LineSensor leftSide(LEFT_LINE_SENSOR), rightSide(RIGHT_LINE_SENSOR);
+LineSensor leftLineSensor(LEFT_LINE_SENSOR), rightLineSensor(RIGHT_LINE_SENSOR);
 long positionLeft = -999;
 long positionRight = -999;
 
 Motors motors(RIGHT_MOTOR_ENABLE, LEFT_MOTOR_ENABLE, RIGHT_MOTOR_TOP_WIRE, RIGHT_MOTOR_BOTTOM_WIRE, LEFT_MOTOR_TOP_WIRE, LEFT_MOTOR_BOTTOM_WIRE);
 
 // Defines the states of the main loop
-enum states { follow_line, look_for_syringe, drive_to_syringe, pick_up_syringe, drive_to_origin };
+enum states { Line_Follow, look_for_syringe, drive_to_syringe,recheck_for_syringe, final_rotate_toward_syringe, pick_up_syringe, return_to_origin };
 states state;
 
 LobotServoController xArm(Serial2);
@@ -29,5 +29,23 @@ piData check;
 Encoder leftEncoder(LEFT_MOTOR_BCD_YELLOW_A, LEFT_MOTOR_BCD_WHITE_B);
 Encoder rightEncoder(RIGHT_MOTOR_BCD_YELLOW_A, RIGHT_MOTOR_BCD_WHITE_B);
 NavOdometery navData(&leftEncoder, &rightEncoder,&motors);
-
+#define STEADYSTATECAMERADELAY 2000
+#define DISTANCE_UNTIL_CHECK 350.0
+// define this constant to be used whenever checking the camera.
 #endif // !botBuilder_h
+
+void dropoff() {
+
+	xArm.moveServos(6, 1000, 1, 735, 2, 877, 3, 132, 4, 857, 5, 687, 6, 892);
+
+	delay(1000);
+
+	xArm.moveServos(6, 1000, 1, 735, 2, 877, 3, 34, 4, 838, 5, 617, 6, 892);
+
+	delay(1000);
+
+	xArm.moveServos(6, 1000, 1, 450, 2, 877, 3, 34, 4, 838, 5, 617, 6, 892);
+
+	delay(1000);
+
+}

@@ -37,6 +37,22 @@ float WHEEL_BASE = 221.5;
 
 /* ----------------------------------------------------------------------- */
 /* odometers() maintains these global accumulator variables: */
+namespace NavOdometeryFunc
+{
+	//commented sections go together, Either the top or bottom should be active, not both (obviously) 
+	//the bottom is if the rotation in the wrong direction.
+	double rotateCoordsX(double x, double y, double thetaRads)
+	{
+		return x * cos(thetaRads) - y * sin(thetaRads);
+		//return x * cos(thetaRads) + y * sin(thetaRads);
+	}
+	double rotateCoordsY(double x, double y, double thetaRads)
+	{
+		return y * cos(thetaRads) + x * sin(thetaRads);
+		//return y * cos(thetaRads) - x * sin(thetaRads);
+		
+	}
+}
 class NavOdometery{
 public:
 	double degree;
@@ -61,8 +77,8 @@ public:
 	/* ----------------------------------------------------------------------- */
 	/* locate_target() uses these global variables */
 	
-	 double X_target;                 /* X lateral target position */
-	 double Y_target;                 /* Y vertical target position */
+	 double X_target;                 /* X lateral target position from original orientation */
+	 double Y_target;                 /* Y vertical target position from original orientation*/
 	 double target_bearing = 0.0;           /* bearing in radians from current	position */
 	
 	 double target_distance = 0.0;         	/* distance in inches from position  */
@@ -117,7 +133,7 @@ public:
 	                last_left = lsamp; 
 	                last_right = rsamp; 
 	
-			/* convert longs to floats and ticks to inches */
+			/* convert longs to floats and ticks to mm */
 	                left_mm = (double)L_ticks/LEFT_CLICKS_PER_MM;
 	                right_mm = (double)R_ticks/RIGHT_CLICKS_PER_MM;
 	
@@ -131,7 +147,7 @@ public:
 	                theta -= (double)((int)(theta/TWOPI))*TWOPI;
 			            theta_D = theta * 180/PI;
 
-			/* now calculate and accumulate our position in inches */
+			/* now calculate and accumulate our position in mm */
 	                Y_pos += mm * cos(theta); 
 	                X_pos += mm * sin(theta); 
 	
@@ -157,10 +173,23 @@ public:
 	
 		
 	}
+	void turnToDegrees(double degree)
+	{
+		if (theta_D < degree)
+		{
+			turnRightToDegrees(degree);
+		}
+		else
+		{
+			turnLeftToDegrees(degree);
+		}
+	}
 	void turnRightToDegrees(double degree)
 	{
-		while (theta_D <= degree + overshoot) {
-			/*view_Odometry();//*/odometers();
+		while (theta_D <= degree + overshoot)
+		{
+			
+			odometers();
 			WHEEL_BASE = 250;
 			motors.right();
 		}
@@ -187,17 +216,18 @@ public:
 			motors.drive();
 		}
 		motors.park();
-		X_target = 0.0;
-		Y_target = 0.0;
 	}
 
-	void go_and_get(double x, double y) {
+	void go_and_get(double x,// x cordients. Goes perpindicular to the robot
+		double y, //Y coordinants, goes parrelell with the robot
+		float percentDistance //percent of the distance to travel before stoping, only defined behavior for between 0 and 1
+	) {
 		X_target = x;
 		Y_target = y;
 		motors.park(); //make sure that motors are off before starting
 		locate_target();//calculate the degrees to turn and the distance to travel
-		turnRightToDegrees(target_bearing); //turn to aling with the target
-		drive_dist(dist); //drive toward the target
+		turnToDegrees(target_bearing); //turn to aling with the target
+		drive_dist(dist*percentDistance); //drive toward the target
 		
 	}
 };
