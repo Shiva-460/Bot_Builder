@@ -210,10 +210,24 @@ public:
 	}
 
 	void drive_dist(double drive_dist_mm) {
-		while (sqrt(X_pos*X_pos + Y_pos * Y_pos) <= drive_dist_mm)
+		double x_start;
+		double y_start;
+		//since the origin might not be the start point of the drive_dist func, we need to account for that.
+		while (sqrt((X_pos- x_start)*(X_pos- x_start) + (Y_pos- y_start) * (Y_pos- y_start)) <= drive_dist_mm)
 		{
 			odometers();
 			motors.drive();
+		}
+		motors.park();
+	}
+	void rev_dist(double drive_dist_mm) {
+		double x_start;
+		double y_start;
+		//since the origin might not be the start point of the drive_dist func, we need to account for that.
+		while (sqrt((X_pos - x_start)*(X_pos - x_start) + (Y_pos - y_start) * (Y_pos - y_start)) <= drive_dist_mm)
+		{
+			odometers();
+			motors.reverse();
 		}
 		motors.park();
 	}

@@ -18,7 +18,7 @@ long positionRight = -999;
 Motors motors(RIGHT_MOTOR_ENABLE, LEFT_MOTOR_ENABLE, RIGHT_MOTOR_TOP_WIRE, RIGHT_MOTOR_BOTTOM_WIRE, LEFT_MOTOR_TOP_WIRE, LEFT_MOTOR_BOTTOM_WIRE);
 
 // Defines the states of the main loop
-enum states { Line_Follow, look_for_syringe, drive_to_syringe,recheck_for_syringe, final_rotate_toward_syringe, pick_up_syringe, return_to_origin };
+enum states { Line_Follow, look_for_syringe, drive_to_syringe,recheck_for_syringe, final_rotate_toward_syringe, final_rotate_toward_syringe_backup, pick_up_syringe, return_to_origin };
 states state;
 
 LobotServoController xArm(Serial2);

@@ -10,7 +10,7 @@ void clearBuffer()
 piData SerialSendReceive()
 {
   piData toReturn;
-  toReturn.syringeBool = 0;
+  toReturn.syringeBool = 0; //make sure this value isn't garbage even if the pi doesn't send a properly formed packet.
  Serial.print("S");  
   if (Serial.available() > 0) 
   {
