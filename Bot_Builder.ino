@@ -16,20 +16,29 @@ void setup() {
 	
  
   Serial.begin(38400); //for pi communication
-  Serial2.begin(9600); // For arm communication
-  Serial.println("Current Position: ");
-  state = Line_Follow;
+  Serial3.begin(9600); // For arm communication
+  //Serial.println("Current Position: ");
+  //state = Line_Follow;
+  state = look_for_syringe;
   check.syringeBool = 0; //ensure that this value isn't garbage.
   dropoff(); //set arm to the default state
+  //navData.go_and_get(1000, 1000, 1);
+  while (SerialSendReceive(&check).piPresent == 0); //if the pi isn't sending data, don't start moving.
 }
 void loop() {
+	
+	navData.odometers();
+	//Serial3.println(state);
 	switch (state)
 	{
 	case Line_Follow:
 		lineFollow(motors, leftLineSensor, rightLineSensor);
-		if ((navData.left_mm + navData.right_mm) / 2 > DISTANCE_UNTIL_CHECK/*mm*/)
+
+		//Serial.print(navData.left_mm);
+		if (navData.totalMM > DISTANCE_UNTIL_CHECK/*mm*/)
 		{
 			state = look_for_syringe;
+			break;
 		}
 		else 
 		{
@@ -38,38 +47,52 @@ void loop() {
 		break;
 	case look_for_syringe:
 		motors.park();
-		navData.resetOdometry(); //anytime we stop at a known place, (e.g. the line) we should reset our odometry. Otherwise we'll never linefollow again.
-		navData.turnRightToDegrees(90);// turn outward to check for Syringes
-
+		navData.resetOdometry(); //anytime we stop at a known place,
+		//(e.g. the line) we should reset our odometry. Otherwise we'll never linefollow again.
+		navData.turnToDegrees(90);// turn outward to check for Syringes
+		navData.turnToDegrees(90);
+		motors.park();
 		delay(STEADYSTATECAMERADELAY);
-		check = SerialSendReceive();
-		if (check.syringeBool==1)
+		check = SerialSendReceive(&check);
+		delay(1);
+		//Serial3.println(check.syringeBool);
+		//Serial3.println(check.coordx);
+		//Serial3.println(check.coordy);
+		//Serial3.println(check.coordz);
+
+		if (check.syringeBool)
 		{
 			state = drive_to_syringe;
+			break;
 		}
 		else
 		{
-			navData.turnRightToDegrees(0);
+			
+			navData.turnToDegrees(5);
+			navData.drive_dist(30);
+			motors.park();
+			navData.resetOdometry();
 			state = Line_Follow;
 		}
 		
 		break;
 	case drive_to_syringe:
-		navData.go_and_get(NavOdometeryFunc::rotateCoordsX(check.coordz, check.coordx, navData.theta) - navData.X_pos,
-			NavOdometeryFunc::rotateCoordsY(check.coordz, check.coordx, navData.theta) - navData.Y_pos,
+		navData.go_and_get(NavOdometeryFunc::rotateCoordsX(check.coordz*1000, check.coordx*1000, navData.theta) - navData.X_pos,
+			NavOdometeryFunc::rotateCoordsY(check.coordz*1000, check.coordx*1000, navData.theta) - navData.Y_pos,
 			0.70); //blocking function
 		state = recheck_for_syringe;
 
 		break;
 	case recheck_for_syringe:
 		delay(STEADYSTATECAMERADELAY); //always wait for the camera to catch up
-		check = SerialSendReceive();
+		check = SerialSendReceive(&check);
 		if (check.syringeBool)
 		{
 			navData.go_and_get(NavOdometeryFunc::rotateCoordsX(check.coordz, check.coordx, navData.theta) - navData.X_pos,
 				NavOdometeryFunc::rotateCoordsY(check.coordz, check.coordx, navData.theta) - navData.Y_pos,
 				0.9);//blocking function
 			state = final_rotate_toward_syringe;
+			break;
 		}
 		else
 		{
@@ -78,7 +101,7 @@ void loop() {
 		break;
 	case final_rotate_toward_syringe:
 		delay(STEADYSTATECAMERADELAY); //always wait for the camera to catch up
-		check = SerialSendReceive();
+		check = SerialSendReceive(&check);
 		if (check.syringeBool)
 		{
 			navData.go_and_get(NavOdometeryFunc::rotateCoordsX(check.coordz, check.coordx, navData.theta) - navData.X_pos,
@@ -94,13 +117,14 @@ void loop() {
 		break;
 	case final_rotate_toward_syringe_backup: //esentially a "try again" to find the syringe
 		delay(STEADYSTATECAMERADELAY); //always wait for the camera to catch up
-		check = SerialSendReceive();
+		check = SerialSendReceive(&check);
 		if (check.syringeBool)
 		{
 			navData.go_and_get(NavOdometeryFunc::rotateCoordsX(check.coordz, check.coordx, navData.theta) - navData.X_pos,
 				NavOdometeryFunc::rotateCoordsY(check.coordz, check.coordx, navData.theta) - navData.Y_pos,
 				0.0);//rotate toward but do not go forward anymore, We're assuming we're close enough here. THis might need to be a feedback loop however.
 			state = pick_up_syringe;
+			break;
 		}
 		else //this time though, we'll just return to the origin if it's not there.
 		{
@@ -111,11 +135,13 @@ void loop() {
 	case pick_up_syringe:
 		IK(servos, 30, -14, 0); //attempt to pick up the syringe
 		xArm.moveServos(servos,6,1000); 
+		state = return_to_origin;
 
 		break;
 	case return_to_origin:
 		navData.go_and_get(0, 0, 1);
 		navData.turnToDegrees(0);
+		state = Line_Follow;
 		break;
 	}
 

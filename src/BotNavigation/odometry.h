@@ -1,4 +1,9 @@
 
+#ifndef Odometry_h
+#define Odometry_h
+
+
+
 /*
  * Christopher Marisco 
  * 3/5/19
@@ -9,7 +14,7 @@
  *
  * Odometry Implementation file.
  */
-
+#define FUDGEDIST 1.0
 #include <math.h>		/* trig function header */
 
 #include "Encoder.h"    /* read from encoders */
@@ -43,13 +48,13 @@ namespace NavOdometeryFunc
 	//the bottom is if the rotation in the wrong direction.
 	double rotateCoordsX(double x, double y, double thetaRads)
 	{
-		return x * cos(thetaRads) - y * sin(thetaRads);
-		//return x * cos(thetaRads) + y * sin(thetaRads);
+		//return x * cos(thetaRads) - y * sin(thetaRads);
+		return x * cos(thetaRads) + y * sin(thetaRads);
 	}
 	double rotateCoordsY(double x, double y, double thetaRads)
 	{
-		return y * cos(thetaRads) + x * sin(thetaRads);
-		//return y * cos(thetaRads) - x * sin(thetaRads);
+		//return y * cos(thetaRads) + x * sin(thetaRads);
+		return y * cos(thetaRads) - x * sin(thetaRads);
 		
 	}
 }
@@ -95,7 +100,7 @@ private:
 	Encoder * knobRightptr;
 	Motors * motors;
 public:
-
+	double totalMM=0;
 	NavOdometery(Encoder * left, Encoder * right, Motors * MOTORS)
 	{
 		knobLeftptr = left;
@@ -110,11 +115,10 @@ public:
 	
 	void resetOdometry()
 	{
-		knobLeft.write(0);
-		knobRight.write(0);
-		last_left = 0;
-		last_right = 0;
 		theta = 0;
+		X_pos = 0;
+		Y_pos = 0;
+		totalMM = 0;
 	}
 	
 	void odometers()
@@ -150,6 +154,7 @@ public:
 			/* now calculate and accumulate our position in mm */
 	                Y_pos += mm * cos(theta); 
 	                X_pos += mm * sin(theta); 
+					totalMM += mm;
 	
 	        
 	}
@@ -210,21 +215,23 @@ public:
 	}
 
 	void drive_dist(double drive_dist_mm) {
-		double x_start;
-		double y_start;
+		double startMM = totalMM;
+		drive_dist_mm = drive_dist_mm * FUDGEDIST;
 		//since the origin might not be the start point of the drive_dist func, we need to account for that.
-		while (sqrt((X_pos- x_start)*(X_pos- x_start) + (Y_pos- y_start) * (Y_pos- y_start)) <= drive_dist_mm)
+		while (abs(totalMM-startMM) <= drive_dist_mm)
 		{
-			odometers();
 			motors.drive();
+			odometers();
+			
 		}
 		motors.park();
 	}
 	void rev_dist(double drive_dist_mm) {
-		double x_start;
-		double y_start;
+		double startMM = totalMM;
+		drive_dist_mm = drive_dist_mm * FUDGEDIST;
 		//since the origin might not be the start point of the drive_dist func, we need to account for that.
-		while (sqrt((X_pos - x_start)*(X_pos - x_start) + (Y_pos - y_start) * (Y_pos - y_start)) <= drive_dist_mm)
+
+		while (abs(totalMM - startMM) <= drive_dist_mm)
 		{
 			odometers();
 			motors.reverse();
@@ -241,7 +248,7 @@ public:
 		motors.park(); //make sure that motors are off before starting
 		locate_target();//calculate the degrees to turn and the distance to travel
 		turnToDegrees(target_bearing); //turn to aling with the target
-		drive_dist(dist*percentDistance); //drive toward the target
+		drive_dist(target_distance*percentDistance); //drive toward the target
 		
 	}
 };
@@ -249,3 +256,5 @@ public:
 
 #undef  knobRight
 #undef  motors
+#undef FUDGEDIST
+#endif // !Odometry_h

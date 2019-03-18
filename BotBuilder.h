@@ -21,7 +21,7 @@ Motors motors(RIGHT_MOTOR_ENABLE, LEFT_MOTOR_ENABLE, RIGHT_MOTOR_TOP_WIRE, RIGHT
 enum states { Line_Follow, look_for_syringe, drive_to_syringe,recheck_for_syringe, final_rotate_toward_syringe, final_rotate_toward_syringe_backup, pick_up_syringe, return_to_origin };
 states state;
 
-LobotServoController xArm(Serial2);
+LobotServoController xArm(Serial3);
 
 // Stores the servos of the arm as an array, from servo 1 to servo 6
 LobotServo servos[6];// = {500, 500, 500, 500, 500, 500};
@@ -30,7 +30,7 @@ Encoder leftEncoder(LEFT_MOTOR_BCD_YELLOW_A, LEFT_MOTOR_BCD_WHITE_B);
 Encoder rightEncoder(RIGHT_MOTOR_BCD_YELLOW_A, RIGHT_MOTOR_BCD_WHITE_B);
 NavOdometery navData(&leftEncoder, &rightEncoder,&motors);
 #define STEADYSTATECAMERADELAY 2000
-#define DISTANCE_UNTIL_CHECK 350.0
+#define DISTANCE_UNTIL_CHECK 450.0
 // define this constant to be used whenever checking the camera.
 #endif // !botBuilder_h
 
