@@ -14,7 +14,7 @@
  *
  * Odometry Implementation file.
  */
-#define FUDGEDIST 1.0
+#define FUDGEDIST .6
 #include <math.h>		/* trig function header */
 
 #include "Encoder.h"    /* read from encoders */
@@ -48,13 +48,13 @@ namespace NavOdometeryFunc
 	//the bottom is if the rotation in the wrong direction.
 	double rotateCoordsX(double x, double y, double thetaRads)
 	{
-		//return x * cos(thetaRads) - y * sin(thetaRads);
-		return x * cos(thetaRads) + y * sin(thetaRads);
+		return x * cos(-thetaRads) - y * sin(-thetaRads);
+		//return x * cos(thetaRads) + y * sin(thetaRads);
 	}
 	double rotateCoordsY(double x, double y, double thetaRads)
 	{
-		//return y * cos(thetaRads) + x * sin(thetaRads);
-		return y * cos(thetaRads) - x * sin(thetaRads);
+		return y * cos(-thetaRads) + x * sin(-thetaRads);
+		//return y * cos(thetaRads) - x * sin(thetaRads);
 		
 	}
 }
@@ -149,7 +149,16 @@ public:
 	
 			/* and clip the rotation to plus or minus 360 degrees */
 	                theta -= (double)((int)(theta/TWOPI))*TWOPI;
+					if (theta < (-PI))
+					{
+						theta = TWOPI - theta;
+					}
+					if (theta > (PI))
+					{
+						theta = theta - TWOPI;
+					}
 			            theta_D = theta * 180/PI;
+
 
 			/* now calculate and accumulate our position in mm */
 	                Y_pos += mm * cos(theta); 
@@ -167,11 +176,15 @@ public:
 	        	y = Y_target - Y_pos;
 	
 	        	target_distance = sqrt((x*x)+(y*y));
-		
-	        	/* no divide-by-zero allowed! */
-	        	if (x > 0.00001) target_bearing = 90.0 - (atan(y/x)*RADS);
-	        	else if (x < -0.00001) target_bearing = 360.0 - (90.0 + (atan(y/x)  *RADS));
-	
+				if (y == 0) y += .00001;
+				/* no divide-by-zero allowed! */
+				
+				if (y > 0) target_bearing = (atan(x/y)*RADS);
+				/*if(y < 0)*/
+				else if(x<0)  target_bearing = (-PI+atan(x/y))*RADS;
+				else target_bearing = (PI+atan(x / y))*RADS;
+	        	
+
 	        	heading_error = target_bearing - theta_D;
 	        	if (heading_error > 180.0) heading_error -= 360.0;
 			else if (heading_error < -180.0) heading_error += 360.0;
@@ -180,6 +193,14 @@ public:
 	}
 	void turnToDegrees(double degree)
 	{
+		if (degree > 180)
+		{
+			degree -= 360;
+		}
+		else if(degree <-180)
+		{
+			degree += 180;
+		}
 		if (theta_D < degree)
 		{
 			turnRightToDegrees(degree);
@@ -191,7 +212,7 @@ public:
 	}
 	void turnRightToDegrees(double degree)
 	{
-		while (theta_D <= degree + overshoot)
+		while (theta_D <= degree )
 		{
 			
 			odometers();
@@ -204,7 +225,7 @@ public:
 
 	void turnLeftToDegrees(double degree)
 	{
-		while (theta_D >= degree + overshoot) 
+		while (theta_D >= degree) 
 		{
 			odometers();
 			WHEEL_BASE = 250;

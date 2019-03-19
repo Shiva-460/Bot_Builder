@@ -49,3 +49,18 @@ void dropoff() {
 	delay(1000);
 
 }
+void pickup()
+{
+	xArm.moveServo(1, 850, 500);
+		delay(515);
+}
+void upward()
+{
+	xArm.moveServos(6, 1000, 1, 450, 2, 450, 3, 450, 4, 450, 5, 450, 6, 450);
+	delay(1000);
+}
+void outFirst()
+{
+	xArm.moveServos(5, 1000, 2, 450, 3, 450, 4, 450, 5, 450, 6, 450);
+	delay(1000);
+}

@@ -13,7 +13,7 @@
 #include "botbuilder.h"
 
 void setup() {
-	
+	initialize_servos(servos);
  
   Serial.begin(38400); //for pi communication
   Serial3.begin(9600); // For arm communication
@@ -22,11 +22,23 @@ void setup() {
   state = look_for_syringe;
   check.syringeBool = 0; //ensure that this value isn't garbage.
   dropoff(); //set arm to the default state
+
+  
   //navData.go_and_get(1000, 1000, 1);
+  //DEBUG
+  //navData.turnToDegrees(17);
+  //Serial.print(navData.theta_D);
+  //navData.go_and_get(NavOdometeryFunc::rotateCoordsX( .01 * 1000,.566 * 1000, navData.theta) + navData.X_pos,
+  //NavOdometeryFunc::rotateCoordsY( .01 * 1000,.556 * 1000, navData.theta) + navData.Y_pos ,
+  //0.70);
+  // navData.go_and_get(100,-100, 1);// TESTED WORKS!
   while (SerialSendReceive(&check).piPresent == 0); //if the pi isn't sending data, don't start moving.
 }
+void(*reset)(void) = 0;
 void loop() {
-	
+
+	if (!check.piPresent) reset();
+		
 	navData.odometers();
 	//Serial3.println(state);
 	switch (state)
@@ -48,17 +60,12 @@ void loop() {
 	case look_for_syringe:
 		motors.park();
 		navData.resetOdometry(); //anytime we stop at a known place,
-		//(e.g. the line) we should reset our odometry. Otherwise we'll never linefollow again.
 		navData.turnToDegrees(90);// turn outward to check for Syringes
 		navData.turnToDegrees(90);
 		motors.park();
 		delay(STEADYSTATECAMERADELAY);
 		check = SerialSendReceive(&check);
-		delay(1);
-		//Serial3.println(check.syringeBool);
-		//Serial3.println(check.coordx);
-		//Serial3.println(check.coordy);
-		//Serial3.println(check.coordz);
+
 
 		if (check.syringeBool)
 		{
@@ -77,8 +84,8 @@ void loop() {
 		
 		break;
 	case drive_to_syringe:
-		navData.go_and_get(NavOdometeryFunc::rotateCoordsX(check.coordz*1000, check.coordx*1000, navData.theta) - navData.X_pos,
-			NavOdometeryFunc::rotateCoordsY(check.coordz*1000, check.coordx*1000, navData.theta) - navData.Y_pos,
+		navData.go_and_get(NavOdometeryFunc::rotateCoordsX(check.coordx * 1000, check.coordz * 1000, navData.theta) + navData.X_pos,
+			NavOdometeryFunc::rotateCoordsY(check.coordx * 1000, check.coordz * 1000, navData.theta) + navData.Y_pos,
 			0.70); //blocking function
 		state = recheck_for_syringe;
 
@@ -88,10 +95,12 @@ void loop() {
 		check = SerialSendReceive(&check);
 		if (check.syringeBool)
 		{
-			navData.go_and_get(NavOdometeryFunc::rotateCoordsX(check.coordz, check.coordx, navData.theta) - navData.X_pos,
-				NavOdometeryFunc::rotateCoordsY(check.coordz, check.coordx, navData.theta) - navData.Y_pos,
-				0.9);//blocking function
-			state = final_rotate_toward_syringe;
+			navData.go_and_get(NavOdometeryFunc::rotateCoordsX(check.coordx * 1000, check.coordz * 1000,
+				navData.theta) + navData.X_pos,
+				NavOdometeryFunc::rotateCoordsY( check.coordx*1000,check.coordz*1000,
+					navData.theta) + navData.Y_pos,
+				1.2);//blocking function
+			state = pick_up_syringe;
 			break;
 		}
 		else
@@ -99,48 +108,30 @@ void loop() {
 			state = return_to_origin;
 		}
 		break;
-	case final_rotate_toward_syringe:
-		delay(STEADYSTATECAMERADELAY); //always wait for the camera to catch up
-		check = SerialSendReceive(&check);
-		if (check.syringeBool)
-		{
-			navData.go_and_get(NavOdometeryFunc::rotateCoordsX(check.coordz, check.coordx, navData.theta) - navData.X_pos,
-				NavOdometeryFunc::rotateCoordsY(check.coordz, check.coordx, navData.theta) - navData.Y_pos,
-				0.0);//rotate toward but do not go forward anymore, We're assuming we're close enough here. THis might need to be a feedback loop however.
-			state = pick_up_syringe;
-		}
-		else
-		{
-			navData.rev_dist(20);
-			state = final_rotate_toward_syringe_backup;
-		}
-		break;
-	case final_rotate_toward_syringe_backup: //esentially a "try again" to find the syringe
-		delay(STEADYSTATECAMERADELAY); //always wait for the camera to catch up
-		check = SerialSendReceive(&check);
-		if (check.syringeBool)
-		{
-			navData.go_and_get(NavOdometeryFunc::rotateCoordsX(check.coordz, check.coordx, navData.theta) - navData.X_pos,
-				NavOdometeryFunc::rotateCoordsY(check.coordz, check.coordx, navData.theta) - navData.Y_pos,
-				0.0);//rotate toward but do not go forward anymore, We're assuming we're close enough here. THis might need to be a feedback loop however.
-			state = pick_up_syringe;
-			break;
-		}
-		else //this time though, we'll just return to the origin if it's not there.
-		{
-			state = return_to_origin;
-		}
-		break;
+
 
 	case pick_up_syringe:
-		IK(servos, 30, -14, 0); //attempt to pick up the syringe
-		xArm.moveServos(servos,6,1000); 
+		IK(servos, 22, -16, 0); //attempt to pick up the syringe
+		upward();
+		xArm.moveServos(servos, 6, 2000);
+		delay(2200);
+		xArm.moveServo(6, 480, 300);
+		delay(315);
+		xArm.moveServo(2,350,200);
+		
+		delay(215);
+		pickup();
+		outFirst();
+		dropoff();
 		state = return_to_origin;
+		delay(5000);
 
 		break;
+	default:
 	case return_to_origin:
-		navData.go_and_get(0, 0, 1);
+		navData.go_and_get(0, 0, 1.4);
 		navData.turnToDegrees(0);
+		navData.resetOdometry();
 		state = Line_Follow;
 		break;
 	}
