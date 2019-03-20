@@ -44,6 +44,19 @@ void Motors::left(){
   //reverse_mr();
   reverse_ml();
 }
+void Motors::slowRight() {
+	//drive_mr();
+	drive_ml();
+	//reverse_ml();
+	//reverse_mr();
+}
+
+void Motors::slowLeft() {
+	//drive_ml();
+	drive_mr();
+	//reverse_mr();
+	//reverse_ml();
+}
 
 void Motors::reverse(){
   reverse_mr();

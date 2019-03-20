@@ -25,6 +25,8 @@
     void park();
     void right();
     void left();
+	void slowRight();
+	void slowLeft();
     void drive_mr();
     void drive_ml();
     void reverse_mr();

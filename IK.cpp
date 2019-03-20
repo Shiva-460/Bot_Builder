@@ -13,10 +13,10 @@ void IK(LobotServo servos[], float pos_x, float pos_y, float pos_z){
   float b_on_a = b / a;
   
   // Calculate the values that the "wrist" should be at, x and y
-  float x = ((a + b_on_a * b) - sqrt(sq(a + b_on_a * b) - (1 + sq(b_on_a))*(a_squared + b_squared - sq(l_p)))) / (1 + sq(b_on_a));
-  float y = b_on_a * x;
-  //float x = l_p * cos(PI*2/3/*+2*b/sqrt(a_squared+b_squared)*/) + a;
-  //float y = l_p * sin(PI*2/3/*+2*b/sqrt(a_squared+b_squared)*/) + b;
+  //float x = ((a + b_on_a * b) - sqrt(sq(a + b_on_a * b) - (1 + sq(b_on_a))*(a_squared + b_squared - sq(l_p)))) / (1 + sq(b_on_a));
+  //float y = b_on_a * x;
+  float x = l_p * cos(PI*2/3/*+2*b/sqrt(a_squared+b_squared)*/) + a;
+  float y = l_p * sin(PI*2/3/*+2*b/sqrt(a_squared+b_squared)*/) + b;
 
   // Calculate the length of B, the actual distance from the origin to the "wrist"
   //float B = sqrt(a_squared + b_squared) - l_p;

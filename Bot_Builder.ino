@@ -1,3 +1,4 @@
+
 /*
  * Christopher Marisco
  * Spencer Sawyer
@@ -9,278 +10,131 @@
 //View = testing without motor power.
 //Test = testing with motor power.
 
-//#include <Encoder.h> Used in odometry.h
+#include "botbuilder.h"
 
-#include "Wires.h"
-#include "src/lineFollowing/lineFollowing.h"
-#include "src/DeadReckoning/DeadReckoner.h"
-#include "odometry.h"
-#include "IK.h"
-#include "src/SerialCallResponse/serialPiCom.h"
-
-
-
-//Encoder knobLeft(LEFT_MOTOR_BCD_YELLOW_A, LEFT_MOTOR_BCD_WHITE_B);
-//Encoder knobRight(RIGHT_MOTOR_BCD_YELLOW_A, RIGHT_MOTOR_BCD_WHITE_B);
-
-LineSensor leftSide(LEFT_LINE_SENSOR), rightSide(RIGHT_LINE_SENSOR);
-
-const int mr_en = RIGHT_MOTOR_ENABLE; //Motor 1 PWM Speed Control Pin, Pin 1 on L239
-const int ml_en = LEFT_MOTOR_ENABLE; //Motor 2 PWM Speed Control Pin, Pin 9 on L239
-
-const int mr_da = RIGHT_MOTOR_TOP_WIRE; //Motor 1 Directional Control A, Pin 2 on L239
-const int mr_db = RIGHT_MOTOR_BOTTOM_WIRE; //Motor 1 Directional Control B, Pin 7 on L239
-const int ml_da = LEFT_MOTOR_TOP_WIRE; //Motor 2 Directional Control A, Pin 15 on L239
-const int ml_db = LEFT_MOTOR_BOTTOM_WIRE; //Motor 2 Directional Control B, Pin 10 on L239
-
-long positionLeft  = -999;
-long positionRight = -999;
-
-
-
-
-
-Motors motors(mr_en, ml_en, mr_da, mr_db, ml_da, ml_db);
-
-enum origin {
-    ZERO, NINETY
-    
-  };
-  origin o;
-
-// Defines the states of the main loop
-enum states {follow_line, look_for_syringe, drive_to_syringe, pick_up_syringe, drive_to_origin};
-states state;
-
-LobotServoController xArm(Serial2);
-
-// Stores the servos of the arm as an array, from servo 1 to servo 6
-LobotServo servos[6];// = {500, 500, 500, 500, 500, 500};
 void setup() {
-  /*****Test_Target*****/
-  //targets are used in odometry.h
+	initialize_servos(servos);
+ 
+  Serial.begin(38400); //for pi communication
+  Serial3.begin(9600); // For arm communication
+  //Serial.println("Current Position: ");
+  //state = Line_Follow;
+  state = look_for_syringe;
+  check.syringeBool = 0; //ensure that this value isn't garbage.
+  dropoff(); //set arm to the default state
 
-  X_target = 500.0; //50 cm
-  Y_target = 500.0; //50 cm
-  origin o = ZERO;
-  Serial.begin(38400);
-  Serial2.begin(9600); // For arm communication
-  Serial.println("Current Position: ");
+  
+  //navData.go_and_get(1000, 1000, 1);
+  //DEBUG
+  //navData.turnToDegrees(17);
+  //Serial.print(navData.theta_D);
+  //navData.go_and_get(NavOdometeryFunc::rotateCoordsX( .01 * 1000,.566 * 1000, navData.theta) + navData.X_pos,
+  //NavOdometeryFunc::rotateCoordsY( .01 * 1000,.556 * 1000, navData.theta) + navData.Y_pos ,
+  //0.70);
+  // navData.go_and_get(100,-100, 1);// TESTED WORKS!
+  while (SerialSendReceive(&check).piPresent == 0); //if the pi isn't sending data, don't start moving.
 }
+void(*reset)(void) = 0;
 void loop() {
-  //view_Encoders();
-  //test_Encoders();
-  //view_Odometry();
-  //test_Odometry();
-  //test_Y_Distance();
-  test_Turn();
-  //delay(2000);
 
-  switch (state) {
-    // Default to line following
-    case follow_line:
-      lineFollow(motors, leftSide, rightSide);
-      // Every 25cm turn to the right and look for a syringe
-      if (total_mm >= 250){
-        state = look_for_syringe;  
-      }
-      break;
-      
-    case look_for_syringe:
-      // TO-DO reset origin
-      turn_right_ninety();
-      // Read from camera
-      // Check if valid (?)
-      // if (syringe == true)
-      //    state = drive_to_syringe
-      // else
-      //    turn_left_ninety
-      //    state = follow_line
-      break;
+	if (!check.piPresent) reset();
+		
+	navData.odometers();
+	//Serial3.println(state);
+	switch (state)
+	{
+	case Line_Follow:
+		lineFollow(motors, leftLineSensor, rightLineSensor);
 
-    case drive_to_syringe:
-      // Drive to within 10cm of the syringe
-      // if syringe distance < 10cm
-      //   state = drive_to_syringe
-      // else
-      //   state = pick_up_syringe;
-     break;
+		//Serial.print(navData.left_mm);
+		if (navData.totalMM > DISTANCE_UNTIL_CHECK/*mm*/)
+		{
+			state = look_for_syringe;
+			break;
+		}
+		else 
+		{
+			state = Line_Follow;
+		}
+		break;
+	case look_for_syringe:
+		motors.park();
+		navData.resetOdometry(); //anytime we stop at a known place,
+		navData.turnToDegrees(90);// turn outward to check for Syringes
+		navData.turnToDegrees(90);
+		motors.park();
+		delay(STEADYSTATECAMERADELAY);
+		check = SerialSendReceive(&check);
 
-    case pick_up_syringe:
-       // IK(coordinates)
-       dropoff();
-       state = drive_to_origin;
-      break;
-    default:
-      state = follow_line;
-      break;
-  }
-}
 
-void turn_right_ninety(){
-  if (o == ZERO && theta_D <= 90.0){
-    motors.right();
-  } else{
-    o = NINETY;
-  }
-}
+		if (check.syringeBool)
+		{
+			state = drive_to_syringe;
+			break;
+		}
+		else
+		{
+			
+			navData.turnToDegrees(5);
+			navData.drive_dist(30);
+			motors.park();
+			navData.resetOdometry();
+			state = Line_Follow;
+		}
+		
+		break;
+	case drive_to_syringe:
+		navData.go_and_get(NavOdometeryFunc::rotateCoordsX(check.coordx * 1000, check.coordz * 1000, navData.theta) + navData.X_pos,
+			NavOdometeryFunc::rotateCoordsY(check.coordx * 1000, check.coordz * 1000, navData.theta) + navData.Y_pos,
+			0.70); //blocking function
+		state = recheck_for_syringe;
 
-void turn_left_ninety(){
-  if (o == NINETY && theta_D >= 0.0){
-    motors.left();
-   //motors.park();
-  } else{
-    o = ZERO;
-  }
-}
+		break;
+	case recheck_for_syringe:
+		delay(STEADYSTATECAMERADELAY); //always wait for the camera to catch up
+		check = SerialSendReceive(&check);
+		if (check.syringeBool)
+		{
+			navData.go_and_get(NavOdometeryFunc::rotateCoordsX(check.coordx * 1000, check.coordz * 1000,
+				navData.theta) + navData.X_pos,
+				NavOdometeryFunc::rotateCoordsY( check.coordx*1000,check.coordz*1000,
+					navData.theta) + navData.Y_pos,
+				1.2);//blocking function
+			state = pick_up_syringe;
+			break;
+		}
+		else
+		{
+			state = return_to_origin;
+		}
+		break;
 
-void view_Encoders(){
 
-  //Include these statements in setup first:
-  /***********************/
-  //Serial.begin(115200); //9600 for Arduino IDE.
-  //Serial.println("Two Wheels Encoder Test: ");
-  /***********************/
+	case pick_up_syringe:
+		IK(servos, 22, -16, 0); //attempt to pick up the syringe
+		upward();
+		xArm.moveServos(servos, 6, 2000);
+		delay(2200);
+		xArm.moveServo(6, 480, 300);
+		delay(315);
+		xArm.moveServo(2,350,200);
+		
+		delay(215);
+		pickup();
+		outFirst();
+		dropoff();
+		state = return_to_origin;
+		delay(5000);
 
-  //Encoder's view while driving:
-  long newLeft, newRight;
-  
-  newLeft = knobLeft.read();
-  newRight = knobRight.read();
-  if (newLeft != positionLeft || newRight != positionRight) {
-    Serial.print("Left = ");
-    Serial.print(newLeft);
-    Serial.print(", Right = ");
-    Serial.print(newRight);
-    Serial.println();
-    positionLeft = newLeft;
-    positionRight = newRight;
-  }
-  // if a character is sent from the serial monitor,
-  // reset both back to zero.
-  if (Serial.available()) {
-    Serial.read();
-    Serial.println("Reset both knobs to zero");
-    knobLeft.write(0);
-    knobRight.write(0);
-  }
-}
-
-void test_Encoders(){
-  view_Encoders();
-  motors.drive();
-}
-
-void view_Odometry(){
-  /***********************/
-  /***********************/
-
-  //if (lsamp != last_left || rsamp != last_right) {
-    Serial.print("X Position in cm = ");
-    Serial.print(X_pos/10);
-    Serial.print(", Y Position in cm = ");
-    Serial.print(Y_pos/10);
-    Serial.print(", Theta = ");
-    Serial.print(theta_D);
-    Serial.println();
-
-  // if a character is sent from the serial monitor,
-  // reset both back to zero.
-  if (Serial.available()) {
-    Serial.read();
-    Serial.println("Reset both Encoders to zero");
-    knobLeft.write(0);
-    knobRight.write(0);
-  }
-
-  /*
-   * Called from odometry.h
-   * Used to calculate actual positions X_pos, X_target, etc...
-   */
-  odometers();
+		break;
+	default:
+	case return_to_origin:
+		navData.go_and_get(0, 0, 1.4);
+		navData.turnToDegrees(0);
+		navData.resetOdometry();
+		state = Line_Follow;
+		break;
+	}
 
 }
 
-//Untested.
-//TO-DO.
-void test_Odometry(){
-  view_Odometry();
-  motors.drive();
-}
-
-/*****Tests Turning*****/
-
-void test_Turn()
-{
-
-  /**States for turning**/
-  view_Odometry();//*/odometers();
-
-  if (o == ZERO && theta_D <= 90.0){
-    
-    motors.right();
-  } else{
-    o = NINETY;
-    
-  }
-  
-
-  if (o == NINETY && theta_D >= 0.0){
-    motors.left();
-   //motors.park();
-  } else{
-    o = ZERO;
-  }
-  //Serial.print(theta_D); Serial.print("\n");
-}
-
-//Untested.
-//TO-DO.
-void view_Targert(){
-  /*view_Odometry();//*/odometers();
-  locate_target();
-
-  Serial.print("Target X in cm = ");
-  Serial.print(X_target/10);
-  Serial.print(", Target Y in cm = ");
-  Serial.print(Y_target/10);
-  Serial.print(", Distance in cm = ");
-  Serial.print(target_distance/10);
-  Serial.print(", Target Bearing = ");
-  Serial.print(target_bearing);
-  Serial.println();
-  
-  // if a character is sent from the serial monitor,
-  // reset both back to zero.
-  if (Serial.available()) {
-    Serial.read();
-    Serial.println("Reset both Encoders to zero");
-    knobLeft.write(0);
-    knobRight.write(0);
-  }
-}
-
-void test_Y_Distance(){
-  view_Odometry();//*/odometers();
-  if((Y_pos/10.0) < 35.0){
-    motors.drive();
-  }else{
-  motors.park();
-  }
-}
-
-void dropoff(){
-
-  xArm.moveServos(6, 1000, 1, 735, 2, 877, 3, 132, 4, 857, 5, 687, 6, 892);
-  
-  delay(1000);
-  
-  xArm.moveServos(6, 1000, 1, 735, 2, 877, 3, 34, 4, 838, 5, 617, 6, 892);
-  
-  delay(1000);
-  
-  xArm.moveServos(6, 1000, 1, 450, 2, 877, 3, 34, 4, 838, 5, 617, 6, 892);
-  
-  delay(1000);
-
-}
